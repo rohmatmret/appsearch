@@ -1,5 +1,5 @@
 package appsearch
 
-func main() string {
+func Hello() string {
 	return "hello appsearch"
 }
