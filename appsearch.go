@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"time"
 )
@@ -21,7 +22,21 @@ type AppSearch struct {
 	EngineName string
 }
 
+type Client struct {
+	ApiKey     string
+	Url        string
+	EngineName string
+}
+
 func NewAppSearch(ApiKey, Url, EngineName string) *AppSearch {
+	return &AppSearch{
+		ApiKey:     ApiKey,
+		Url:        Url,
+		EngineName: EngineName,
+	}
+}
+
+func Connect() *AppSearch {
 	return &AppSearch{
 		ApiKey:     ApiKey,
 		Url:        Url,
@@ -135,6 +150,15 @@ type Page struct {
 type Result interface{}
 
 func (c AppSearch) ListDocument(page io.Reader) *http.Response {
+	valid := c.Validate()
+	if !valid {
+		return &http.Response{
+			Status:     "Invalid",
+			StatusCode: http.StatusBadRequest,
+			Body:       ioutil.NopCloser(bytes.NewBufferString(`{"error": "Invalid data Configurations"}`)),
+		}
+	}
+
 	h := http.Client{Timeout: time.Second * 5}
 	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/engines/%s/documents/list", c.Url, c.EngineName), page)
 	if err != nil {
@@ -157,6 +181,15 @@ func (c AppSearch) ListDocument(page io.Reader) *http.Response {
 }
 
 func (c AppSearch) FindIds(id string) *http.Response {
+	valid := c.Validate()
+	if !valid {
+		return &http.Response{
+			Status:     "Invalid",
+			StatusCode: http.StatusBadRequest,
+			Body:       ioutil.NopCloser(bytes.NewBufferString(`{"error": "Invalid data Configurations"}`)),
+		}
+	}
+
 	h := http.Client{Timeout: time.Second * 5}
 	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/engines/%s/documents/ids[%s]", c.Url, c.EngineName, id), nil)
 	if err != nil {
@@ -179,6 +212,14 @@ func (c AppSearch) FindIds(id string) *http.Response {
 }
 
 func (c AppSearch) Search(query string, page io.Reader) *http.Response {
+	valid := c.Validate()
+	if !valid {
+		return &http.Response{
+			Status:     "Invalid",
+			StatusCode: http.StatusBadRequest,
+			Body:       ioutil.NopCloser(bytes.NewBufferString(`{"error": "Invalid data Configurations"}`)),
+		}
+	}
 	h := http.Client{Timeout: time.Second * 5}
 	req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/engines/%s/search", c.Url, c.EngineName), page)
 	if err != nil {
