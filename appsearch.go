@@ -66,6 +66,7 @@ func (c AppSearch) CreateEngine(EngineName string) *http.Response {
 	}
 
 	req.Header.Add("Accept", `application/json`)
+	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", c.ApiKey))
 	resp, err := h.Do(req)
 	if err != nil {
@@ -88,6 +89,7 @@ func (c AppSearch) ListEngine(page byte) *http.Response {
 		}
 	}
 	req.Header.Add("Accept", `application/json`)
+	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", c.ApiKey))
 	resp, err := h.Do(req)
 	if err != nil {
@@ -109,6 +111,7 @@ func (c AppSearch) DeleteEngine(EngineName string) *http.Response {
 		}
 	}
 	req.Header.Add("Accept", `application/json`)
+	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", c.ApiKey))
 	resp, err := h.Do(req)
 	if err != nil {
@@ -168,6 +171,7 @@ func (c AppSearch) ListDocument(page io.Reader) *http.Response {
 		}
 	}
 	req.Header.Add("Accept", `application/json`)
+	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", c.ApiKey))
 
 	resp, err := h.Do(req)
@@ -199,6 +203,7 @@ func (c AppSearch) FindIds(id string) *http.Response {
 		}
 	}
 	req.Header.Add("Accept", `application/json`)
+	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", c.ApiKey))
 	resp, err := h.Do(req)
 	if err != nil {
@@ -234,6 +239,7 @@ func (c AppSearch) Search(query string, page io.Reader) *http.Response {
 	req.URL.RawQuery = q.Encode()
 
 	req.Header.Add("Accept", `application/json`)
+	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", c.ApiKey))
 
 	resp, err := h.Do(req)
@@ -260,6 +266,7 @@ func (c AppSearch) Suggestions(query string) *http.Response {
 	q.Add("query", query)
 	req.URL.RawQuery = q.Encode()
 	req.Header.Add("Accept", `application/json`)
+	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", c.ApiKey))
 	resp, err := h.Do(req)
 	if err != nil {
@@ -268,5 +275,28 @@ func (c AppSearch) Suggestions(query string) *http.Response {
 			StatusCode: http.StatusInternalServerError,
 		}
 	}
+	return resp
+}
+
+func (c AppSearch) FilterDocument(filters io.Reader) *http.Response {
+	h := http.Client{Timeout: time.Second * 5}
+	req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/engines/%s/search", c.Url, c.EngineName), filters)
+	if err != nil {
+		return &http.Response{
+			Status:     err.Error(),
+			StatusCode: http.StatusInternalServerError,
+		}
+	}
+	req.Header.Add("Accept", `application/json`)
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", c.ApiKey))
+	resp, err := h.Do(req)
+	if err != nil {
+		return &http.Response{
+			Status:     err.Error(),
+			StatusCode: http.StatusInternalServerError,
+		}
+	}
+
 	return resp
 }
