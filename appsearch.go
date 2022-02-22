@@ -29,6 +29,7 @@ type Client struct {
 	EngineName string
 }
 
+// Default returns an Appsearch instance
 func NewAppSearch(ApiKey, Url, EngineName string) *AppSearch {
 	return &AppSearch{
 		ApiKey:     ApiKey,
@@ -45,6 +46,7 @@ func Connect() *AppSearch {
 	}
 }
 
+// Create Engine with params EngineName
 func (c AppSearch) CreateEngine(EngineName string) *http.Response {
 	values := map[string]string{"name": EngineName}
 	body, err := json.Marshal(values)
@@ -63,6 +65,7 @@ func (c AppSearch) CreateEngine(EngineName string) *http.Response {
 	return <-ch
 }
 
+// List of all engines
 func (c AppSearch) ListEngine(page, limit string) *http.Response {
 	URL := fmt.Sprintf("%s/engines", c.Url)
 	payload := strings.NewReader(`{"page": ` + page + `, "limit": ` + limit + `}`)
@@ -71,6 +74,7 @@ func (c AppSearch) ListEngine(page, limit string) *http.Response {
 	return <-ch
 }
 
+// Delete Engine with params EngineName
 func (c AppSearch) DeleteEngine(EngineName string) *http.Response {
 	URL := fmt.Sprintf("%s/engines/%s", c.Url, EngineName)
 	ch := make(chan *http.Response)
@@ -85,6 +89,9 @@ func (c AppSearch) IndexDocument(body io.Reader) *http.Response {
 	return <-ch
 }
 
+// List of all documents in engine
+// you can set paggination
+// with strings.NewReader(`{"page": ` + page + `, "limit": ` + limit + `}`)
 func (c AppSearch) ListDocument(page io.Reader) *http.Response {
 	valid := c.Validate()
 	if !valid {
@@ -102,6 +109,7 @@ func (c AppSearch) ListDocument(page io.Reader) *http.Response {
 	return <-ch
 }
 
+// Find Document with params ID
 func (c AppSearch) FindIds(id string) *http.Response {
 	valid := c.Validate()
 	if !valid {
@@ -119,6 +127,9 @@ func (c AppSearch) FindIds(id string) *http.Response {
 	return <-ch
 }
 
+// Search Document with params query
+// you can set query with string.NewReader()
+// example : strings.NewReader(`{"query": "` + query + `"}`)
 func (c AppSearch) Search(query io.Reader) *http.Response {
 	valid := c.Validate()
 	if !valid {
@@ -134,6 +145,7 @@ func (c AppSearch) Search(query io.Reader) *http.Response {
 	return <-ch
 }
 
+// Suggestion Document with params query
 func (c AppSearch) Suggestions(query string) *http.Response {
 	valid := c.Validate()
 	if !valid {
@@ -150,8 +162,9 @@ func (c AppSearch) Suggestions(query string) *http.Response {
 	return <-ch
 }
 
+// Filter Document with params query
 func (c AppSearch) FilterDocument(filters io.Reader) *http.Response {
-	URL := fmt.Sprintf("%s/engines/%s/documents/search", c.Url, c.EngineName)
+	URL := fmt.Sprintf("%s/engines/%s/search", c.Url, c.EngineName)
 	ch := make(chan *http.Response)
 	go NewHttpClient(http.Client{Timeout: time.Second * 5}).Call(http.MethodPost, URL, c.ApiKey, filters, ch)
 	return <-ch
