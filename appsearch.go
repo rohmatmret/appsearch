@@ -111,6 +111,7 @@ func (c AppSearch) ListDocument(page io.Reader) *http.Response {
 
 // Find Document with params ID
 func (c AppSearch) FindIds(id string) *http.Response {
+	ids := strings.NewReader(`{"ids": [` + id + `]}`)
 	valid := c.Validate()
 	if !valid {
 		return &http.Response{
@@ -121,9 +122,9 @@ func (c AppSearch) FindIds(id string) *http.Response {
 	}
 
 	newHttp := NewHttpClient(http.Client{Timeout: time.Second * 5})
-	URL := fmt.Sprintf("%s/engines/%s/documents/ids[%s]", c.Url, c.EngineName, id)
+	URL := fmt.Sprintf("%s/engines/%s/documents", c.Url, c.EngineName)
 	ch := make(chan *http.Response)
-	go newHttp.Call(http.MethodGet, URL, c.ApiKey, nil, ch)
+	go newHttp.Call(http.MethodGet, URL, c.ApiKey, ids, ch)
 	return <-ch
 }
 
