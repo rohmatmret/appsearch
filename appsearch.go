@@ -170,3 +170,21 @@ func (c AppSearch) FilterDocument(filters io.Reader) *http.Response {
 	go NewHttpClient(http.Client{Timeout: time.Second * 5}).Call(http.MethodPost, URL, c.ApiKey, filters, ch)
 	return <-ch
 }
+
+// Analitycs Query /api/as/v1/engines/{ENGINE_NAME}/analytics/queries
+// 1. Top Query
+// 2. Query Filtering
+func (c AppSearch) Analytics() *http.Response {
+	URL := fmt.Sprintf("%s/engines/%s/analytics/queries", c.Url, c.EngineName)
+	ch := make(chan *http.Response)
+	go NewHttpClient(http.Client{Timeout: time.Second * 5}).Call(http.MethodGet, URL, c.ApiKey, nil, ch)
+	return <-ch
+}
+
+// Click API Track which results were clicked after a query.
+func (c AppSearch) Click(filter io.Reader) *http.Response {
+	URL := fmt.Sprintf("%s/engines/%s/analytics/click", c.Url, c.EngineName)
+	ch := make(chan *http.Response)
+	go NewHttpClient(http.Client{Timeout: time.Second * 5}).Call(http.MethodPost, URL, c.ApiKey, filter, ch)
+	return <-ch
+}
