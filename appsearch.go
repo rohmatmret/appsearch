@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"strings"
 	"time"
@@ -98,7 +97,7 @@ func (c AppSearch) ListDocument(page io.Reader) *http.Response {
 		return &http.Response{
 			Status:     "Invalid",
 			StatusCode: http.StatusBadRequest,
-			Body:       ioutil.NopCloser(bytes.NewBufferString(`{"error": "Invalid data Configurations"}`)),
+			Body:       io.NopCloser(bytes.NewBufferString(`{"error": "Invalid data Configurations"}`)),
 		}
 	}
 
@@ -117,7 +116,7 @@ func (c AppSearch) FindIds(id string) *http.Response {
 		return &http.Response{
 			Status:     "Invalid",
 			StatusCode: http.StatusBadRequest,
-			Body:       ioutil.NopCloser(bytes.NewBufferString(`{"error": "Invalid data Configurations"}`)),
+			Body:       io.NopCloser(bytes.NewBufferString(`{"error": "Invalid data Configurations"}`)),
 		}
 	}
 
@@ -137,7 +136,7 @@ func (c AppSearch) Search(query io.Reader) *http.Response {
 		return &http.Response{
 			Status:     "Invalid",
 			StatusCode: http.StatusBadRequest,
-			Body:       ioutil.NopCloser(bytes.NewBufferString(`{"error": "Invalid data Configurations"}`)),
+			Body:       io.NopCloser(bytes.NewBufferString(`{"error": "Invalid data Configurations"}`)),
 		}
 	}
 	URL := fmt.Sprintf("%s/engines/%s/search", c.Url, c.EngineName)
@@ -153,7 +152,7 @@ func (c AppSearch) Suggestions(query string) *http.Response {
 		return &http.Response{
 			Status:     "Invalid",
 			StatusCode: http.StatusBadRequest,
-			Body:       ioutil.NopCloser(bytes.NewBufferString(`{"error": "Invalid data Configurations"}`)),
+			Body:       io.NopCloser(bytes.NewBufferString(`{"error": "Invalid data Configurations"}`)),
 		}
 	}
 	payload := strings.NewReader(`{"query": "` + query + `"}`)
@@ -186,5 +185,30 @@ func (c AppSearch) Click(filter io.Reader) *http.Response {
 	URL := fmt.Sprintf("%s/engines/%s/analytics/click", c.Url, c.EngineName)
 	ch := make(chan *http.Response)
 	go NewHttpClient(http.Client{Timeout: time.Second * 5}).Call(http.MethodPost, URL, c.ApiKey, filter, ch)
+	return <-ch
+}
+
+// Get List Schema
+func (c AppSearch) ListSchema() *http.Response {
+	URL := fmt.Sprintf("%s/engines/%s/schema", c.Url, c.EngineName)
+	ch := make(chan *http.Response)
+	go NewHttpClient(http.Client{Timeout: time.Second * 5}).Call(http.MethodGet, URL, c.ApiKey, nil, ch)
+	return <-ch
+}
+
+// Create Schema
+func (c AppSearch) CreateSchema(body io.Reader) *http.Response {
+	valid := c.Validate()
+	if !valid {
+		return &http.Response{
+			Status:     "Invalid",
+			StatusCode: http.StatusBadRequest,
+			Body:       io.NopCloser(bytes.NewBufferString(`{"error": "Invalid data Configurations"}`)),
+		}
+	}
+
+	URL := fmt.Sprintf("%s/engines/%s/schema", c.Url, c.EngineName)
+	ch := make(chan *http.Response)
+	go NewHttpClient(http.Client{Timeout: time.Second * 5}).Call(http.MethodPost, URL, c.ApiKey, body, ch)
 	return <-ch
 }

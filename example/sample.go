@@ -3,6 +3,8 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"os"
+	"reflect"
 	"strings"
 
 	"github.com/rohmatmret/appsearch"
@@ -40,27 +42,102 @@ func ListDocument() {
 
 // example for search with pagging
 func Search() {
-	app := appsearch.Connect()
-	page := strings.NewReader(`{page :{current:1,size:10}}`)
-	resp := app.Search("keyword", page)
+	appsearch.ApiKey = os.Getenv("API_KEY")
+	appsearch.Url = os.Getenv("URL")
+	appsearch.EngineName = "catalog"
+	app := appsearch.NewAppSearch(appsearch.ApiKey, appsearch.Url, appsearch.EngineName)
+
+	payload := strings.NewReader(`{ 
+		query :"nova",
+		page : {current :1, size :1}
+	}`)
+
+	resp := app.Search(payload)
 
 	var data Result
 	err := json.NewDecoder(resp.Body).Decode(&data)
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
 	}
 
 	fmt.Println(data)
 }
 
+func FilterDocument() {
+	appsearch.ApiKey = os.Getenv("API_KEY")
+	appsearch.Url = os.Getenv("URL")
+	appsearch.EngineName = "catalog"
+	app := appsearch.NewAppSearch(appsearch.ApiKey, appsearch.Url, appsearch.EngineName)
+
+	payload := strings.NewReader(`{
+    "query":"bobo",
+    "filters": {
+        "any":[
+            {"all":[{"type":"book"}]}
+        ]        
+    },
+    "page": {
+        "current":1,
+        "size":1
+    }
+	}`)
+
+	resp := app.FilterDocument(payload)
+
+	var data Result
+	err := json.NewDecoder(resp.Body).Decode(&data)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(reflect.TypeOf(data))
+}
+
+func Suggestion() {
+	appsearch.ApiKey = os.Getenv("API_KEY")
+	appsearch.Url = os.Getenv("URL")
+	appsearch.EngineName = "catalog"
+	app := appsearch.NewAppSearch(appsearch.ApiKey, appsearch.Url, appsearch.EngineName)
+	resp := app.Suggestions("bobo")
+
+	var data Result
+	err := json.NewDecoder(resp.Body).Decode(&data)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(reflect.TypeOf(data))
+}
+func FindAll() {
+	appsearch.ApiKey = os.Getenv("API_KEY")
+	appsearch.Url = os.Getenv("URL")
+	appsearch.EngineName = "catalog"
+	app := appsearch.NewAppSearch(appsearch.ApiKey, appsearch.Url, appsearch.EngineName)
+
+	resp := app.ListDocument(nil)
+	var data Result
+	err := json.NewDecoder(resp.Body).Decode(&data)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(reflect.TypeOf(data))
+}
+
+func FinByID() {
+	appsearch.ApiKey = os.Getenv("API_KEY")
+	appsearch.Url = os.Getenv("URL")
+	appsearch.EngineName = "catalog"
+	app := appsearch.NewAppSearch(appsearch.ApiKey, appsearch.Url, appsearch.EngineName)
+	resp := app.FindIds("239933")
+
+	var data Result
+	err := json.NewDecoder(resp.Body).Decode(&data)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(reflect.TypeOf(data))
+}
+
 func main() {
-
-	// axample init engine
-	appsearch.ApiKey = "your-private-key"
-	appsearch.Url = "your engine url"
-	appsearch.EngineName = "enginename"
-	appsearch.Connect()
-
-	// or you can init engine with your config
-	appsearch.NewAppSearch("your-private-key", "your engine url", "enginename")
+	Search()         // Search with pagging
+	FilterDocument() // Filter Document
+	FinByID()        // Find by ID
 }
