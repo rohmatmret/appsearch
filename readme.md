@@ -1,11 +1,17 @@
 ## AppSearch Client for ElasticAppsearch
+[![Go Report Card](https://goreportcard.com/badge/github.com/rohmatmret/appsearch)](https://goreportcard.com/report/github.com/rohmatmret/appsearch)
+[![GoDoc](https://godoc.org/github.com/rohmatmret/appsearch?status.svg)](https://godoc.org/github.com/rohmatmret/appsearch)
 
-### Require
-- Apikey
+> This is a simple client for Elastic AppSearch. This client is still in development. If you want to contribute, please fork this repository and send a pull request.
+
+### Please Read Full Official documentation [here..](https://www.elastic.co/guide/en/app-search/current/api-reference.html)
+
+## Require
+- Apikey  [here..](https://www.elastic.co/guide/en/app-search/current/authentication.html#authentication-api-keys)
 - Host
 
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/rohmatmret/appsearch)](https://goreportcard.com/report/github.com/rohmatmret/appsearch)
+
 
 
 ## Installation
@@ -37,10 +43,14 @@ func main() {
 ## Feature
 
 - Create Engine
+- List Engine
 - Create Schema
+- List Documents
 - IndexCatalog
 - Search
+- FindByIds
 - Analitycs
+- Click
 - Suggestion
 
 
